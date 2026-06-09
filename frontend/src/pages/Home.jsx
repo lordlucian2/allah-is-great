@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = ""; // relative proxy
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -13,16 +13,26 @@ const Home = () => {
     const fetchData = async () => {
       try {
         const [productsRes, testimonialsRes, dealsRes] = await Promise.all([
-          axios.get(`/api/products`),
-          axios.get(`/api/testimonials`),
-          axios.get(`/api/deals`)
+          axios.get(`${API_URL}/api/products`),
+          axios.get(`${API_URL}/api/testimonials`),
+          axios.get(`${API_URL}/api/deals`)
         ]);
-        const featured = productsRes.data.filter(p => p.is_featured === true);
+
+        // Ensure each response is an array
+        const productsArray = Array.isArray(productsRes.data) ? productsRes.data : [];
+        const testimonialsArray = Array.isArray(testimonialsRes.data) ? testimonialsRes.data : [];
+        const dealsArray = Array.isArray(dealsRes.data) ? dealsRes.data : [];
+
+        const featured = productsArray.filter(p => p.is_featured === true);
         setFeaturedProducts(featured);
-        setTestimonials(testimonialsRes.data);
-        setDeals(dealsRes.data);
+        setTestimonials(testimonialsArray);
+        setDeals(dealsArray);
       } catch (error) {
         console.error('Error fetching data:', error);
+        // Set empty arrays on error so the page doesn't crash
+        setFeaturedProducts([]);
+        setTestimonials([]);
+        setDeals([]);
       } finally {
         setLoading(false);
       }
