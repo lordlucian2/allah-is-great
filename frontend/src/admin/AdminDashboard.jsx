@@ -30,10 +30,11 @@ const AdminDashboard = () => {
         <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-4 rounded">Logout</button>
       </div>
       <div className="flex flex-wrap border-b mb-6">
-        <button onClick={() => setActiveTab('products')} className={`py-2 px-4 ${activeTab === 'products' ? 'border-b-2 border-royalBlue text-royalBlue font-bold' : ''}`}>Products</button>
-        <button onClick={() => setActiveTab('testimonials')} className={`py-2 px-4 ${activeTab === 'testimonials' ? 'border-b-2 border-royalBlue text-royalBlue font-bold' : ''}`}>Testimonials</button>
-        <button onClick={() => setActiveTab('deals')} className={`py-2 px-4 ${activeTab === 'deals' ? 'border-b-2 border-royalBlue text-royalBlue font-bold' : ''}`}>Deals</button>
-        <button onClick={() => setActiveTab('settings')} className={`py-2 px-4 ${activeTab === 'settings' ? 'border-b-2 border-royalBlue text-royalBlue font-bold' : ''}`}>Settings</button>
+        {['products','testimonials','deals','settings'].map(tab => (
+          <button key={tab} onClick={() => setActiveTab(tab)} className={`py-2 px-4 ${activeTab === tab ? 'border-b-2 border-royalBlue text-royalBlue font-bold' : ''}`}>
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
       </div>
       {activeTab === 'products' && <ManageProducts />}
       {activeTab === 'testimonials' && <ManageTestimonials />}

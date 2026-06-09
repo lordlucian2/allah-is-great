@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 
 const ManageSettings = () => {
   const [settings, setSettings] = useState({});
@@ -13,7 +14,7 @@ const ManageSettings = () => {
 
   const fetchSettings = async () => {
     try {
-      const res = await axios.get('/api/settings');
+      const res = await axios.get(apiUrl('/api/settings'));
       setSettings(res.data || {});
     } catch (err) { console.error(err);
     } finally { setLoading(false); }
@@ -28,7 +29,7 @@ const ManageSettings = () => {
     e.preventDefault();
     setSaving(true);
     try {
-      await axios.put('/api/admin/settings', settings, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(apiUrl('/api/admin/settings'), settings, { headers: { Authorization: `Bearer ${token}` } });
       alert('Settings saved');
     } catch (err) { alert('Error saving');
     } finally { setSaving(false); }
@@ -37,8 +38,8 @@ const ManageSettings = () => {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/admin/change-password', passwordData, { headers: { Authorization: `Bearer ${token}` } });
-      setPasswordMessage('Password updated');
+      await axios.post(apiUrl('/api/admin/change-password'), passwordData, { headers: { Authorization: `Bearer ${token}` } });
+      setPasswordMessage('Password updated (until server restart)');
       setPasswordData({ currentPassword: '', newPassword: '' });
     } catch (err) {
       setPasswordMessage(err.response?.data?.error || 'Error');
@@ -78,4 +79,5 @@ const ManageSettings = () => {
     </div>
   );
 };
+
 export default ManageSettings;

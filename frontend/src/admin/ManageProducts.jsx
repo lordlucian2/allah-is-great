@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 
 const ManageProducts = () => {
   const [products, setProducts] = useState([]);
@@ -14,7 +15,7 @@ const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('/api/products');
+      const res = await axios.get(apiUrl('/api/products'));
       setProducts(res.data);
     } catch (err) {
       console.error('Fetch error', err);
@@ -40,9 +41,9 @@ const ManageProducts = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       if (editingProduct) {
-        await axios.put(`/api/admin/products/${editingProduct.id}`, formData, config);
+        await axios.put(apiUrl(`/api/admin/products/${editingProduct.id}`), formData, config);
       } else {
-        await axios.post('/api/admin/products', formData, config);
+        await axios.post(apiUrl('/api/admin/products'), formData, config);
       }
       resetForm();
       fetchProducts();
@@ -68,7 +69,7 @@ const ManageProducts = () => {
     if (!confirm('Are you sure?')) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`/api/admin/products/${id}`, config);
+      await axios.delete(apiUrl(`/api/admin/products/${id}`), config);
       fetchProducts();
     } catch (err) {
       alert('Delete failed');

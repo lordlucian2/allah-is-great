@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 
 const ManageDeals = () => {
   const [deals, setDeals] = useState([]);
@@ -14,22 +15,17 @@ const ManageDeals = () => {
 
   const fetchDeals = async () => {
     try {
-      const res = await axios.get('/api/deals');
+      const res = await axios.get(apiUrl('/api/deals'));
       setDeals(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('/api/products');
+      const res = await axios.get(apiUrl('/api/products'));
       setProducts(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err);
+    } finally { setLoading(false); }
   };
 
   useEffect(() => {
@@ -47,9 +43,9 @@ const ManageDeals = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       if (editing) {
-        await axios.put(`/api/admin/deals/${editing.id}`, formData, config);
+        await axios.put(apiUrl(`/api/admin/deals/${editing.id}`), formData, config);
       } else {
-        await axios.post('/api/admin/deals', formData, config);
+        await axios.post(apiUrl('/api/admin/deals'), formData, config);
       }
       resetForm();
       fetchDeals();
@@ -72,7 +68,7 @@ const ManageDeals = () => {
     if (!confirm('Delete this deal?')) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`/api/admin/deals/${id}`, config);
+      await axios.delete(apiUrl(`/api/admin/deals/${id}`), config);
       fetchDeals();
     } catch (err) {
       alert('Delete failed');
@@ -116,7 +112,6 @@ const ManageDeals = () => {
             <div>
               <p><span className="font-bold">{d.title}</span> – {d.type}</p>
               <p className="text-sm text-gray-600">Until: {d.until_date ? new Date(d.until_date).toLocaleDateString() : 'No expiry'}</p>
-              {d.product_id && <p className="text-xs">Linked to product ID: {d.product_id}</p>}
             </div>
             <div className="space-x-2">
               <button onClick={() => handleEdit(d)} className="bg-yellow-500 text-white py-1 px-2 rounded">Edit</button>

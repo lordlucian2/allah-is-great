@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { apiUrl } from '../utils/api';
 
 const ManageTestimonials = () => {
   const [testimonials, setTestimonials] = useState([]);
@@ -13,7 +14,7 @@ const ManageTestimonials = () => {
 
   const fetchTestimonials = async () => {
     try {
-      const res = await axios.get('/api/testimonials');
+      const res = await axios.get(apiUrl('/api/testimonials'));
       setTestimonials(res.data);
     } catch (err) {
       console.error(err);
@@ -36,9 +37,9 @@ const ManageTestimonials = () => {
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       if (editing) {
-        await axios.put(`/api/admin/testimonials/${editing.id}`, formData, config);
+        await axios.put(apiUrl(`/api/admin/testimonials/${editing.id}`), formData, config);
       } else {
-        await axios.post('/api/admin/testimonials', formData, config);
+        await axios.post(apiUrl('/api/admin/testimonials'), formData, config);
       }
       resetForm();
       fetchTestimonials();
@@ -61,7 +62,7 @@ const ManageTestimonials = () => {
     if (!confirm('Delete this testimonial?')) return;
     try {
       const config = { headers: { Authorization: `Bearer ${token}` } };
-      await axios.delete(`/api/admin/testimonials/${id}`, config);
+      await axios.delete(apiUrl(`/api/admin/testimonials/${id}`), config);
       fetchTestimonials();
     } catch (err) {
       alert('Delete failed');
@@ -83,11 +84,7 @@ const ManageTestimonials = () => {
           <input type="text" name="customer_name" placeholder="Customer Name" value={formData.customer_name} onChange={handleChange} className="w-full p-2 border rounded" required />
           <textarea name="text" placeholder="Testimonial Text" value={formData.text} onChange={handleChange} className="w-full p-2 border rounded" required></textarea>
           <select name="rating" value={formData.rating} onChange={handleChange} className="w-full p-2 border rounded">
-            <option value="5">5 ★★★★★</option>
-            <option value="4">4 ★★★★☆</option>
-            <option value="3">3 ★★★☆☆</option>
-            <option value="2">2 ★★☆☆☆</option>
-            <option value="1">1 ★☆☆☆☆</option>
+            <option value="5">5 ★★★★★</option><option value="4">4 ★★★★☆</option><option value="3">3 ★★★☆☆</option><option value="2">2 ★★☆☆☆</option><option value="1">1 ★☆☆☆☆</option>
           </select>
           <input type="text" name="photo_url" placeholder="Photo URL (optional)" value={formData.photo_url} onChange={handleChange} className="w-full p-2 border rounded" />
           <div className="space-x-2">
