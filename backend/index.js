@@ -330,3 +330,16 @@ app.post('/api/admin/change-password', verifyToken, async (req, res) => {
   );
   res.json({ success: true, message: 'Password updated (until server restart)' });
 });
+
+// Admin Login (if not already present)
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  const adminUser = process.env.ADMIN_USERNAME || 'admin';
+  const adminPass = process.env.ADMIN_PASSWORD || 'allahgreat123';
+  if (username === adminUser && password === adminPass) {
+    const token = jwt.sign({ username, role: 'admin' }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '24h' });
+    res.json({ success: true, token });
+  } else {
+    res.status(401).json({ success: false, message: 'Invalid credentials' });
+  }
+});
