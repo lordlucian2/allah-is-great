@@ -238,3 +238,95 @@ app.delete('/api/admin/deals/:id', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Failed to delete deal' });
   }
 });
+
+// ==================== SETTINGS CRUD ====================
+
+// Get all settings (public)
+app.get('/api/settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT key, value FROM settings');
+    const settings = {};
+    result.rows.forEach(row => { settings[row.key] = row.value; });
+    res.json(settings);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+});
+
+// Update a single setting (admin only)
+app.put('/api/admin/settings', verifyToken, async (req, res) => {
+  const updates = req.body; // { key: value, ... }
+  try {
+    for (const [key, value] of Object.entries(updates)) {
+      await pool.query(
+        'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP',
+        [key, value]
+      );
+    }
+    res.json({ success: true, updated: Object.keys(updates) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+// Change admin password
+app.post('/api/admin/change-password', verifyToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (currentPassword !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  // In production, you should hash the password. For simplicity, we update env variable (won't persist across restarts).
+  // Better to store hashed password in settings table.
+  process.env.ADMIN_PASSWORD = newPassword;
+  // Also persist to settings table
+  await pool.query(
+    'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+    ['admin_password_hash', newPassword] // In real app, hash it.
+  );
+  res.json({ success: true, message: 'Password updated (until server restart)' });
+});
+
+// ==================== SETTINGS CRUD ====================
+
+app.get('/api/settings', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT key, value FROM settings');
+    const settings = {};
+    result.rows.forEach(row => { settings[row.key] = row.value; });
+    res.json(settings);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch settings' });
+  }
+});
+
+app.put('/api/admin/settings', verifyToken, async (req, res) => {
+  const updates = req.body;
+  try {
+    for (const [key, value] of Object.entries(updates)) {
+      await pool.query(
+        'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIMESTAMP',
+        [key, value]
+      );
+    }
+    res.json({ success: true, updated: Object.keys(updates) });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to update settings' });
+  }
+});
+
+app.post('/api/admin/change-password', verifyToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (currentPassword !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Current password is incorrect' });
+  }
+  process.env.ADMIN_PASSWORD = newPassword;
+  await pool.query(
+    'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value',
+    ['admin_password_hash', newPassword]
+  );
+  res.json({ success: true, message: 'Password updated (until server restart)' });
+});

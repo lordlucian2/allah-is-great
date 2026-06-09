@@ -1,16 +1,58 @@
-# React + Vite
+# ALLAH IS GREAT – Official Website
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Live URL:** https://allah-is-great.netlify.app
 
-Currently, two official plugins are available:
+## Project Overview
+A modern, mobile‑first website for an electronics store in New Georgia Estate, Liberia. The site generates customer inquiries via WhatsApp and phone calls.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
+- Product catalog with search & category filters
+- WhatsApp integration (pre‑filled product messages)
+- Admin dashboard to manage products, testimonials, and deals
+- Fully responsive design
 
-## React Compiler
+## Technology Stack
+- **Frontend:** React + Vite + Tailwind CSS
+- **Backend:** Node.js + Express + PostgreSQL (Neon)
+- **Deployment:** Netlify (frontend) + Railway (backend)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Admin Access
+- URL: `https://allah-is-great.netlify.app/admin/login`
+- Username: `admin`
+- Password: `allahgreat123`
 
-## Expanding the ESLint configuration
+## How to Manage Content
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Products
+1. Log in to admin dashboard
+2. Go to **Manage Products**
+3. Add, edit, or delete products
+   - Required fields: name, category, image URL
+   - Optional: price, description, featured status
+
+### Testimonials
+1. Go to **Manage Testimonials**
+2. Add customer name, review text, rating (1-5 stars)
+3. Optional: add a photo URL
+
+### Deals (Today's Deals)
+1. Go to **Manage Deals**
+2. Add title, type (New Arrival / Promotion / Best Seller)
+3. Optional: link to a product, set expiry date
+
+## Important URLs
+- **Public site:** https://allah-is-great.netlify.app
+- **Backend API:** https://thorough-vision-production-71ec.up.railway.app
+- **Database:** Neon (contact developer for credentials)
+
+## Support
+For technical issues or feature requests, contact the developer.
+
+## Future Upgrades (Version 2)
+- Online ordering & delivery requests
+- Inventory management
+- Customer accounts (not included in V1)
+
+---
+
+© 2026 ALLAH IS GREAT – Everything Electronics Under One Roof.
