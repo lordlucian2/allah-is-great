@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Product, Testimonial } from '../types';
 import { CATEGORIES, TESTIMONIALS } from '../data';
+import { formatPrice } from '../utils/price';
 
 interface HomeProps {
   darkMode: boolean;
@@ -48,7 +49,7 @@ export default function Home({
 
   // Quick Action triggers WhatsApp message inquiring a product
   const handleQuickInquiry = (product: Product, section: string) => {
-    const message = `Hello ALLAH IS GREAT store! I am inquiring about the product "${product.name}" listed under "${section}" for the price of $${product.price.toFixed(2)}. Is it currently in stock at New Georgia Estate?`;
+    const message = `Hello ALLAH IS GREAT store! I am inquiring about the product "${product.name}" listed under "${section}" for the price of $${formatPrice(product.price)}. Is it currently in stock at New Georgia Estate?`;
     window.open(`https://wa.me/231776070131?text=${encodeURIComponent(message)}`, '_blank');
   };
 
@@ -307,10 +308,10 @@ export default function Home({
                     </div>
 
                     <div className="flex items-baseline space-x-2 pt-1">
-                      <span className="text-base font-black text-amber-500 font-mono">${p.price.toFixed(2)}</span>
+                      <span className="text-base font-black text-amber-500 font-mono">${formatPrice(p.price)}</span>
                       {p.originalPrice && (
                         <span className="text-xs text-slate-400 dark:text-slate-500 line-through font-mono">
-                          ${p.originalPrice.toFixed(2)}
+                          ${formatPrice(p.originalPrice)}
                         </span>
                       )}
                     </div>
@@ -393,9 +394,9 @@ export default function Home({
                 <div>
                   <h3 className="font-bold text-base tracking-tight line-clamp-1">{p.name}</h3>
                   <div className="flex items-center space-x-2 pt-2">
-                    <span className="text-lg font-black text-red-500 font-mono">${p.price.toFixed(2)}</span>
+                    <span className="text-lg font-black text-red-500 font-mono">${formatPrice(p.price)}</span>
                     {p.originalPrice && (
-                      <span className="text-sm text-slate-400 line-through font-mono">${p.originalPrice.toFixed(2)}</span>
+                      <span className="text-sm text-slate-400 line-through font-mono">${formatPrice(p.originalPrice)}</span>
                     )}
                   </div>
                 </div>

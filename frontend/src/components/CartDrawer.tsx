@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X, Trash2, Plus, Minus, ShoppingBag, Send } from 'lucide-react';
 import { CartItem } from '../types';
+import { formatPrice } from '../utils/price';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -52,8 +53,8 @@ export default function CartDrawer({
     // Generate formatted item lists
     const itemsLines = cart.map((item, idx) => {
       const colorText = item.selectedColor ? ` (Color: ${item.selectedColor})` : '';
-      const itemPrice = item.product.price.toFixed(2);
-      const totalItemVal = (item.product.price * item.quantity).toFixed(2);
+      const itemPrice = formatPrice(item.product.price);
+      const totalItemVal = formatPrice(item.product.price * item.quantity);
       return `${idx + 1}. *${item.product.name}*${colorText}\n    Qty: ${item.quantity} x $${itemPrice} = *$${totalItemVal}*`;
     }).join('\n');
 
@@ -65,9 +66,9 @@ Hello! I would like to place an order for the following items:
 ${itemsLines}
 
 ---------------------------------------
-*Subtotal:* $${subtotal.toFixed(2)}
-*Delivery:* ${deliveryFee === 0 ? '_Free Delivery (Promo)_' : `$${deliveryFee.toFixed(2)}`}
-*Total Order Value:* *$${total.toFixed(2)}*
+*Subtotal:* $${formatPrice(subtotal)}
+*Delivery:* ${deliveryFee === 0 ? '_Free Delivery (Promo)_' : `$${formatPrice(deliveryFee)}`}
+*Total Order Value:* *$${formatPrice(total)}*
 
 *Customer Details:*
 - Client Name: ${customerName}
@@ -271,7 +272,7 @@ Please confirm stock availability and pickup details. Thank you!`;
                             <span className="text-xs text-slate-300 font-semibold">{item.selectedColor}</span>
                           </div>
                         )}
-                        <p className="text-amber-500 font-bold text-sm mt-1.5">${item.product.price.toFixed(2)}</p>
+                        <p className="text-amber-500 font-bold text-sm mt-1.5">${formatPrice(item.product.price)}</p>
                         
                         {/* Quantity Increments */}
                         <div className="flex items-center space-x-2 mt-2">
@@ -317,17 +318,17 @@ Please confirm stock availability and pickup details. Thank you!`;
                 <div className="space-y-2 text-xs font-semibold">
                   <div className="flex items-center justify-between text-slate-400">
                     <span>Subtotal</span>
-                    <span className="font-mono text-sm font-bold text-slate-300">${subtotal.toFixed(2)}</span>
+                    <span className="font-mono text-sm font-bold text-slate-300">${formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex items-center justify-between text-slate-400">
                     <span>Est. Delivery</span>
                     <span className="font-mono text-sm font-bold text-slate-300">
-                      {deliveryFee === 0 ? <span className="text-emerald-500 uppercase tracking-widest text-[10px]">Free (Orders &gt;$150)</span> : `$${deliveryFee.toFixed(2)}`}
+                      {deliveryFee === 0 ? <span className="text-emerald-500 uppercase tracking-widest text-[10px]">Free (Orders &gt;$150)</span> : `$${formatPrice(deliveryFee)}`}
                     </span>
                   </div>
                   <div className="border-t border-dashed border-slate-800/80 pt-2 flex items-center justify-between text-base">
                     <span className="text-white font-black font-sans">Total</span>
-                    <span className="font-mono font-black text-amber-500">${total.toFixed(2)}</span>
+                    <span className="font-mono font-black text-amber-500">${formatPrice(total)}</span>
                   </div>
                 </div>
 

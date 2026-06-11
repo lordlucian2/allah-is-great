@@ -13,9 +13,12 @@ import Contact from './pages/Contact';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 // Mock Data
 import { PRODUCTS } from './data';
 import { Product, CartItem, Testimonial } from './types';
+import { normalizeProduct } from './utils/price';
 
 export default function App() {
   const [currentTab, setCurrentTab] = useState<string>('home');
@@ -46,7 +49,10 @@ export default function App() {
   const [productsList, setProductsList] = useState<Product[]>(() => {
     try {
       const stored = localStorage.getItem('allah_is_great_products');
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed.map(normalizeProduct);
+      }
     } catch (e) {
       console.error(e);
     }
@@ -66,16 +72,17 @@ export default function App() {
   // Run dynamic fetch on component mount
   useEffect(() => {
     // 1. Fetch Products
-    fetch('/api/products')
+    fetch(`${API_BASE}/api/products`)
       .then(res => {
         if (!res.ok) throw new Error('Could not fetch products');
         return res.json();
       })
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setProductsList(data);
+          const normalized = data.map(normalizeProduct);
+          setProductsList(normalized);
           try {
-            localStorage.setItem('allah_is_great_products', JSON.stringify(data));
+            localStorage.setItem('allah_is_great_products', JSON.stringify(normalized));
           } catch {}
         }
       })
@@ -84,7 +91,7 @@ export default function App() {
       });
 
     // 2. Fetch Testimonials
-    fetch('/api/testimonials')
+    fetch(`${API_BASE}/api/testimonials`)
       .then(res => {
         if (!res.ok) throw new Error('Could not fetch testimonials');
         return res.json();
@@ -102,7 +109,7 @@ export default function App() {
       });
 
     // 3. Fetch Settings
-    fetch('/api/settings')
+    fetch(`${API_BASE}/api/settings`)
       .then(res => {
         if (!res.ok) throw new Error('Could not fetch settings');
         return res.json();
@@ -120,9 +127,10 @@ export default function App() {
   // Helper CRUD administrative methods using server state with local replication
   const handleAddProduct = (newProd: Product) => {
     const adminToken = localStorage.getItem('allah_is_great_admin_token') || '';
+    const normalizedNew = normalizeProduct(newProd);
 
     // Optimistically update locally
-    const updated = [newProd, ...productsList];
+    const updated = [normalizedNew, ...productsList];
     setProductsList(updated);
     try {
       localStorage.setItem('allah_is_great_products', JSON.stringify(updated));
@@ -131,7 +139,7 @@ export default function App() {
     }
 
     // Call real POST backend
-    fetch('/api/admin/products', {
+    fetch(`${API_BASE}/api/admin/products`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -170,9 +178,10 @@ export default function App() {
 
   const handleEditProduct = (editedProd: Product) => {
     const adminToken = localStorage.getItem('allah_is_great_admin_token') || '';
+    const normalizedEdited = normalizeProduct(editedProd);
 
     // Optimistically update locally
-    const updated = productsList.map(p => p.id === editedProd.id ? editedProd : p);
+    const updated = productsList.map(p => p.id === editedProd.id ? normalizedEdited : p);
     setProductsList(updated);
     try {
       localStorage.setItem('allah_is_great_products', JSON.stringify(updated));
@@ -181,7 +190,7 @@ export default function App() {
     }
 
     // Call real PUT backend
-    fetch(`/api/admin/products/${editedProd.id}`, {
+    fetch(`${API_BASE}/api/admin/products/${editedProd.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -213,7 +222,7 @@ export default function App() {
     }
 
     // Call real DELETE backend
-    fetch(`/api/admin/products/${productId}`, {
+    fetch(`${API_BASE}/api/admin/products/${productId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${adminToken}`

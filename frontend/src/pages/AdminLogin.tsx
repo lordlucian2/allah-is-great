@@ -24,8 +24,10 @@ export default function AdminLogin({ darkMode, onLoginSuccess }: AdminLoginProps
 
     setIsLoading(true);
 
+    const API_BASE = import.meta.env.VITE_API_URL || '';
+
     // Call authentic supervisor login endpoint
-    fetch('/api/admin/login', {
+    fetch(`${API_BASE}/api/admin/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

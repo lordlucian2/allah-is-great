@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Product } from '../types';
 import { CATEGORIES } from '../data';
+import { formatPrice } from '../utils/price';
 
 export interface Order {
   id: string;
@@ -150,6 +151,11 @@ export default function AdminDashboard({
     badgeText: '',
     specsRaw: 'Processor: Octa-core High Speed\nWarranty: 1 Year Shop Warranty\nGrid Compatibility: 220V standard'
   });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+
+  const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const handleOpenAddProduct = () => {
     setEditingProduct(null);
@@ -231,6 +237,49 @@ export default function AdminDashboard({
     }
 
     setIsProductModalOpen(false);
+  };
+
+  const uploadImageToCloudinary = async (file: File) => {
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      setUploadMessage('Cloudinary is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET.');
+      return;
+    }
+
+    setIsUploadingImage(true);
+    setUploadMessage('Uploading image to Cloudinary...');
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok || !result.secure_url) {
+        throw new Error(result.error?.message || 'Upload failed');
+      }
+
+      setProdForm((prev) => ({ ...prev, image: result.secure_url }));
+      setUploadMessage('Upload succeeded. Image URL has been filled in.');
+    } catch (error) {
+      console.error('Cloudinary upload failed', error);
+      setUploadMessage('Image upload failed. Please use a direct image URL instead.');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleImageFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    await uploadImageToCloudinary(file);
   };
 
   const handleDeleteProductPrompt = (id: string, name: string) => {
@@ -337,7 +386,7 @@ export default function AdminDashboard({
               }`}>
                 <div className="space-y-1">
                   <span className="text-[10px] uppercase font-mono tracking-wider font-bold text-slate-400">Settled Revenue</span>
-                  <h3 className="text-2xl font-black text-amber-500 font-mono">${stats.totalOrderRevenue.toFixed(2)}</h3>
+                  <h3 className="text-2xl font-black text-amber-500 font-mono">${formatPrice(stats.totalOrderRevenue)}</h3>
                   <p className="text-[10px] text-slate-500">From completed client dispatches</p>
                 </div>
                 <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/10">
@@ -432,7 +481,7 @@ export default function AdminDashboard({
                             <td className="py-3 text-slate-400 truncate max-w-[170px]" title={o.deliveryLocation}>
                               {o.deliveryLocation}
                             </td>
-                            <td className="py-3 font-mono font-bold text-slate-350">${o.total.toFixed(2)}</td>
+                            <td className="py-3 font-mono font-bold text-slate-350">${formatPrice(o.total)}</td>
                             <td className="py-3 font-bold">
                               <span className={`px-2 py-0.5 rounded text-[9px] uppercase tracking-wider ${
                                 o.status === 'completed' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/10' :
@@ -591,10 +640,10 @@ export default function AdminDashboard({
                           {/* brand */}
                           <td className="py-3 px-4 text-slate-300 capitalize">{p.brand}</td>
                           {/* price */}
-                          <td className="py-3 px-4 font-mono font-bold text-amber-500">${p.price.toFixed(2)}</td>
+                          <td className="py-3 px-4 font-mono font-bold text-amber-500">${formatPrice(p.price)}</td>
                           {/* original price */}
                           <td className="py-3 px-4 font-mono text-slate-400">
-                            {p.originalPrice ? `$${p.originalPrice.toFixed(2)}` : '—'}
+                            {p.originalPrice ? `$${formatPrice(p.originalPrice)}` : '—'}
                           </td>
                           {/* badge */}
                           <td className="py-3 px-4">
@@ -696,7 +745,7 @@ export default function AdminDashboard({
                           
                           {/* Total */}
                           <td className="py-3.5 px-2 font-mono font-bold text-sm text-slate-900 dark:text-amber-500">
-                            ${o.total.toFixed(2)}
+                            ${formatPrice(o.total)}
                           </td>
                           
                           {/* Status pill select dropdown */}
@@ -872,6 +921,29 @@ export default function AdminDashboard({
                   <span className="text-[9px] text-slate-450 leading-relaxed italic block mt-0.5">
                     Provide an Unsplash, direct image link or placeholder for visual rendering.
                   </span>
+
+                  <div className="mt-3 border border-dashed rounded-2xl p-3 bg-slate-950/10">
+                    <label className="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2 block">
+                      Upload image from device (Cloudinary)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileChange}
+                      className="block w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950"
+                    />
+                    <p className="text-[9px] text-slate-500 mt-2">
+                      {CLOUDINARY_CLOUD_NAME && CLOUDINARY_UPLOAD_PRESET
+                        ? 'Select an image to upload directly to Cloudinary. The resulting image URL will populate the Image Asset URL field automatically.'
+                        : 'Cloudinary upload is not configured. Set VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to enable direct uploads.'}
+                    </p>
+                    {uploadMessage && (
+                      <p className="text-[9px] mt-2 text-amber-300">{uploadMessage}</p>
+                    )}
+                    {isUploadingImage && (
+                      <p className="text-[9px] mt-1 text-slate-300">Uploading...</p>
+                    )}
+                  </div>
                 </div>
 
                 {/* 5. Custom Badge / Deal Text */}
@@ -989,8 +1061,8 @@ export default function AdminDashboard({
                           )}
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="font-mono">{item.quantity} x ${item.price.toFixed(2)}</p>
-                          <p className="font-mono text-amber-500 font-black">${(item.quantity * item.price).toFixed(2)}</p>
+                          <p className="font-mono">{item.quantity} x ${formatPrice(item.price)}</p>
+                          <p className="font-mono text-amber-500 font-black">${formatPrice(item.quantity * item.price)}</p>
                         </div>
                       </div>
                     ))}
@@ -1001,17 +1073,17 @@ export default function AdminDashboard({
                 <div className="space-y-1 text-right font-semibold border-t border-dashed border-slate-800 pt-3">
                   <div className="flex items-center justify-between text-[11px] text-slate-400">
                     <span>Inquiry Subtotal:</span>
-                    <span className="font-mono">${selectedOrder.subtotal.toFixed(2)}</span>
+                    <span className="font-mono">${formatPrice(selectedOrder.subtotal)}</span>
                   </div>
                   <div className="flex items-center justify-between text-[11px] text-slate-400">
                     <span>Delivery Setup:</span>
                     <span className="font-mono">
-                      {selectedOrder.deliveryFee === 0 ? 'FREE' : `$${selectedOrder.deliveryFee.toFixed(2)}`}
+                      {selectedOrder.deliveryFee === 0 ? 'FREE' : `$${formatPrice(selectedOrder.deliveryFee)}`}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-base font-black text-amber-500 pt-1 border-t border-slate-800 mt-1">
                     <span className="dark:text-white">Active Total:</span>
-                    <span className="font-mono text-lg">${selectedOrder.total.toFixed(2)}</span>
+                    <span className="font-mono text-lg">${formatPrice(selectedOrder.total)}</span>
                   </div>
                 </div>
 

@@ -57,8 +57,6 @@ app.get('/api/products', async (req, res) => {
   }
 
 });
-  }
-});
 
 // Get testimonials
 app.get('/api/testimonials', async (req, res) => {
@@ -125,14 +123,57 @@ app.listen(PORT, () => {
 
 // Create product
 app.post('/api/admin/products', verifyToken, async (req, res) => {
-  const { name, category, price, availability_status, image_url, description, is_featured } = req.body;
+  const {
+    name,
+    category,
+    price,
+    availability_status,
+    image_url,
+    image,
+    description,
+    is_featured,
+    isFeatured,
+    brand,
+    original_price,
+    rating,
+    reviews_count,
+    is_best_seller,
+    isBestSeller,
+    is_today_deal,
+    isTodayDeal,
+    badge_text,
+    badgeText,
+    specs,
+    colors
+  } = req.body;
   try {
     const result = await pool.query(
-      `INSERT INTO products (name, category, price, availability_status, image_url, description, is_featured)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [name, category, price, availability_status, image_url, description, is_featured || false]
+      `INSERT INTO products (
+         name, category, price, availability_status, image_url, description, is_featured,
+         brand, original_price, rating, reviews_count, is_best_seller, is_today_deal,
+         badge_text, specs, colors
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       RETURNING *`,
+      [
+        name,
+        category,
+        price,
+        availability_status,
+        image_url || image,
+        description,
+        is_featured ?? isFeatured ?? false,
+        brand || 'Others',
+        original_price ?? null,
+        rating ?? null,
+        reviews_count ?? null,
+        is_best_seller ?? isBestSeller ?? false,
+        is_today_deal ?? isTodayDeal ?? false,
+        badge_text ?? badgeText ?? null,
+        specs ?? null,
+        colors ?? null
+      ]
     );
-    res.json(result.rows[0]);
+    res.json(transformProduct(result.rows[0]));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to create product' });
@@ -142,17 +183,59 @@ app.post('/api/admin/products', verifyToken, async (req, res) => {
 // Update product
 app.put('/api/admin/products/:id', verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { name, category, price, availability_status, image_url, description, is_featured } = req.body;
+  const {
+    name,
+    category,
+    price,
+    availability_status,
+    image_url,
+    image,
+    description,
+    is_featured,
+    isFeatured,
+    brand,
+    original_price,
+    rating,
+    reviews_count,
+    is_best_seller,
+    isBestSeller,
+    is_today_deal,
+    isTodayDeal,
+    badge_text,
+    badgeText,
+    specs,
+    colors
+  } = req.body;
   try {
     const result = await pool.query(
       `UPDATE products SET 
         name = $1, category = $2, price = $3, availability_status = $4, 
-        image_url = $5, description = $6, is_featured = $7
-       WHERE id = $8 RETURNING *`,
-      [name, category, price, availability_status, image_url, description, is_featured, id]
+        image_url = $5, description = $6, is_featured = $7,
+        brand = $8, original_price = $9, rating = $10, reviews_count = $11,
+        is_best_seller = $12, is_today_deal = $13, badge_text = $14, specs = $15, colors = $16
+       WHERE id = $17 RETURNING *`,
+      [
+        name,
+        category,
+        price,
+        availability_status,
+        image_url || image,
+        description,
+        is_featured ?? isFeatured ?? false,
+        brand || 'Others',
+        original_price ?? null,
+        rating ?? null,
+        reviews_count ?? null,
+        is_best_seller ?? isBestSeller ?? false,
+        is_today_deal ?? isTodayDeal ?? false,
+        badge_text ?? badgeText ?? null,
+        specs ?? null,
+        colors ?? null,
+        id
+      ]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
-    res.json(result.rows[0]);
+    res.json(transformProduct(result.rows[0]));
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to update product' });

@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { Star, Search, Filter, SlidersHorizontal, Grid, X, HelpCircle, ChevronRight, ShoppingCart } from 'lucide-react';
 import { Product } from '../types';
 import { CATEGORIES, BRANDS } from '../data';
+import { formatPrice } from '../utils/price';
 
 interface ProductsProps {
   darkMode: boolean;
@@ -113,7 +114,7 @@ export default function Products({
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
   const handleInquireViaWhatsApp = (p: Product) => {
-    const defaultText = `Hello ALLAH IS GREAT store! I’m looking at the product "${p.name}" on your catalog listed for $${p.price.toFixed(2)}. Is this model currently in stock at the New Georgia Estate outlet?`;
+    const defaultText = `Hello ALLAH IS GREAT store! I’m looking at the product "${p.name}" on your catalog listed for $${formatPrice(p.price)}. Is this model currently in stock at the New Georgia Estate outlet?`;
     window.open(`https://wa.me/231776070131?text=${encodeURIComponent(defaultText)}`, '_blank');
   };
 
@@ -368,9 +369,9 @@ export default function Products({
 
                         {/* Prices */}
                         <div className="flex items-baseline space-x-2 pt-0.5">
-                          <span className="text-base font-black text-amber-500 font-mono">${p.price.toFixed(2)}</span>
+                          <span className="text-base font-black text-amber-500 font-mono">${formatPrice(p.price)}</span>
                           {p.originalPrice && (
-                            <span className="text-xs text-slate-400 line-through font-mono">${p.originalPrice.toFixed(2)}</span>
+                            <span className="text-xs text-slate-400 line-through font-mono">${formatPrice(p.originalPrice)}</span>
                           )}
                         </div>
                       </div>

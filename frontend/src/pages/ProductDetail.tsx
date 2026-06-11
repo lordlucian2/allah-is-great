@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Star, ChevronLeft, Calendar, ArrowRight, MessageSquare, ShoppingCart, Check, Heart } from 'lucide-react';
 import { Product } from '../types';
+import { formatPrice } from '../utils/price';
 
 interface ProductDetailProps {
   darkMode: boolean;
@@ -32,12 +33,12 @@ export default function ProductDetail({
   // Construct structured WhatsApp dispatch
   const handleWhatsAppInquiry = () => {
     const colorText = selectedColor ? ` in Color *${selectedColor}*` : '';
-    const messageTemplate = `Hello ALLAH IS GREAT store! I am interested in purchasing your *${product.name}*${colorText} with price listed at *$${product.price.toFixed(2)}*. Is this item available in stock for home delivery or pickup in New Georgia Estate?`;
+    const messageTemplate = `Hello ALLAH IS GREAT store! I am interested in purchasing your *${product.name}*${colorText} with price listed at *$${formatPrice(product.price)}*. Is this item available in stock for home delivery or pickup in New Georgia Estate?`;
     window.open(`https://wa.me/231776070131?text=${encodeURIComponent(messageTemplate)}`, '_blank');
   };
 
   const handleInquireRelated = (p: Product) => {
-    const text = `Hello! I would like to inquire regarding availability details about the *${p.name}* ($${p.price.toFixed(2)}) listed at your outlet.`;
+    const text = `Hello! I would like to inquire regarding availability details about the *${p.name}* ($${formatPrice(p.price)}) listed at your outlet.`;
     window.open(`https://wa.me/231776070131?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -138,12 +139,12 @@ export default function ProductDetail({
 
               {/* Price bracket tag */}
               <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex items-center space-x-4">
-                <span className="text-3xl font-black text-amber-500 font-mono">${product.price.toFixed(2)}</span>
+                <span className="text-3xl font-black text-amber-500 font-mono">${formatPrice(product.price)}</span>
                 {product.originalPrice && (
                   <div className="text-xs text-slate-400">
-                    <span className="line-through font-mono">${product.originalPrice.toFixed(2)}</span>
+                    <span className="line-through font-mono">${formatPrice(product.originalPrice)}</span>
                     <p className="text-[#25D366] font-bold text-[10px] tracking-wider uppercase mt-0.5">
-                      Save ${(product.originalPrice - product.price).toFixed(2)} instantly
+                      Save ${formatPrice(product.originalPrice - product.price)} instantly
                     </p>
                   </div>
                 )}
@@ -264,7 +265,7 @@ export default function ProductDetail({
                   <div className="p-4 flex-1 flex flex-col justify-between">
                     <div onClick={() => onSelectProduct(p)}>
                       <h4 className="font-bold text-sm truncate">{p.name}</h4>
-                      <p className="text-amber-500 font-bold font-mono text-sm mt-1">${p.price.toFixed(2)}</p>
+                      <p className="text-amber-500 font-bold font-mono text-sm mt-1">${formatPrice(p.price)}</p>
                     </div>
 
                     <div className="pt-3 grid grid-cols-1 gap-1.5">
